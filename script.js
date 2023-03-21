@@ -49,13 +49,14 @@ const enter = () => {
 
       const today = new Date().toLocaleDateString('ru-RU', dateToday);
       
-      comments.push({name: textInputElement.value,
+      comments.push({name: textInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;"),
       date: today,
-      text: textareaInputElement.value,
+      text: textareaInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("QUOTE_BEGINS", "<div class='quote'>").replaceAll("QUOTE_ENDS", "</div>"),
       likes: 0,
       like: true}
 
-    );  
+    );   
+  
 
     renderComments();
      
@@ -79,6 +80,8 @@ const enter = () => {
      })
 
   const initAddLike = () => {
+
+    
       
     const addLikeButtons = document.querySelectorAll(".like-button");
 
@@ -86,7 +89,10 @@ const enter = () => {
 
       const index = addLikeButton.dataset.index;
 
-      addLikeButton.addEventListener("click", ()=> {
+      addLikeButton.addEventListener("click", (event)=> {
+
+        event.stopPropagation();
+
         if (comments[index].like === true) {
           comments[index].like = false;
           comments[index].likes +=1;
@@ -100,22 +106,44 @@ const enter = () => {
       })
   
     }
-
     
   }
+const answer =() => {
+
+  const answerCommentElements = document.querySelectorAll(".answer-button");
+
+  for (let answerComment of answerCommentElements) {
+    
+
+    answerComment.addEventListener("click", ()=> {
+
+      const index = answerComment.dataset.index;
+   
+      textareaInputElement.textContent = `QUOTE_BEGINS ${comments[index].name} : \n ${comments[index].text} QUOTE_ENDS`;
+      
+      renderComments();
+      
+    })
+  
+  }
+}
     
   
   const renderComments = () => {
+
+   
     const listElementHtml = comments
     .map((comment, index) => {
-      return       `<li class="comment" >
+
+      return  `<li class="comment answer-button" data-index="${index}">
       <div class="comment-header">
         <div> ${comment.name} </div>
         <div>${comment.date}</div>
       </div>
       <div class="comment-body">
-        <div class="comment-text">
-          ${comment.text}
+      
+        <div class="comment-text"> 
+          ${comment.text} 
         </div>
       </div>
       <div class="comment-footer">
@@ -125,14 +153,20 @@ const enter = () => {
         </div>
       </div>
     </li>`;
-    })
-    .join("");
 
+   
+    })
+    .join("") 
+
+  
   listElement.innerHTML = listElementHtml;
   textInputElement.classList.remove("error");
   textareaInputElement.classList.remove("error");
 
   initAddLike();
+  answer();
+ 
+  
 };
 
 renderComments ();
