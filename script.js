@@ -7,24 +7,40 @@ const textareaInputElement = document.getElementById("comment-input");
 const mainForm = document.querySelector(".add-form");
 
 
-const comments = [
-  {
-    name: "Глеб Фокин",
-   date: "12.02.22 12:18",
-   text: "Это будет первый комментарий на этой странице",
-   likes: 16,
-   like: true,
-  },
+let comments = [];
 
-  {
-    name: "Варвара Н.",
-  date: "13.02.22 19:22",
-  text: "Мне нравится как оформлена эта страница! ❤",
-  likes: 5,
-  like: true,
-}
+const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
+  method: "GET"
+});
 
-];
+fetchPromise.then((response) => {
+
+  const jsonPromise = response.json();
+
+  jsonPromise.then((responseData) => {
+    const relevantComments = responseData.comments.map((comment) => {
+
+      const dateToday = {
+        year: '2-digit',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      };
+
+      return {
+        name: comment.author.name,
+        date: new Date(comment.date).toLocaleDateString('ru-RU', dateToday),
+        text: comment.text,
+        likes: comment.likes,
+        like: true,
+      }
+    });
+
+    comments = relevantComments;
+    renderComments();
+  });
+});
 
 
 const enter = () => { 
@@ -48,17 +64,32 @@ const enter = () => {
       };
 
       const today = new Date().toLocaleDateString('ru-RU', dateToday);
-      
-      comments.push({name: textInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;"),
-      date: today,
-      text: textareaInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("QUOTE_BEGINS", "<div class='quote'>").replaceAll("QUOTE_ENDS", "</div>"),
-      likes: 0,
-      like: true}
 
-    );   
+      fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
+        method: "POST",
+        body: JSON.stringify({
+          name: textInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;"),
+          text: textareaInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("QUOTE_BEGINS", "<div class='quote'>").replaceAll("QUOTE_ENDS", "</div>")
+        })
+      }).then((response) => {
+        response.json().then((responseData) => {
+          // получили данные и рендерим их в приложении
+          tasks = responseData.todos;
+          renderComments();
+        });
+      });
+      
+      //comments.push({name: textInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;"),
+      //date: today,
+     // text: textareaInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("QUOTE_BEGINS", "<div class='quote'>").replaceAll("QUOTE_ENDS", "</div>"),
+    //  likes: 0,
+     // like: true}
+
+   // );   
   
 
     renderComments();
+
      
 
     buttonComment.disabled = true;
@@ -76,30 +107,42 @@ const enter = () => {
 
 
   removeComment.addEventListener("click", () => {
-         listElement.removeChild(listElement.lastElementChild);
-     })
+
+   // const id = deleteButton.dataset.id;
+
+    fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
+      method: "DELETE"
+    }).then((response) => {
+      response.json().then((responseData) => {
+        const listElement = document.getElementById("comments");
+        comments  = responseData.comments.removeChild(listElement.lastElementChild);
+        renderComments();
+      });
+      
+    });
+
+    //     listElement.removeChild(listElement.lastElementChild);
+     });
 
   const initAddLike = () => {
-
-    
-      
+  
     const addLikeButtons = document.querySelectorAll(".like-button");
 
     for (let addLikeButton of addLikeButtons) {
 
-      const index = addLikeButton.dataset.index;
+      const id = addLikeButton.dataset.id;
 
       addLikeButton.addEventListener("click", (event)=> {
 
         event.stopPropagation();
 
-        if (comments[index].like === true) {
-          comments[index].like = false;
-          comments[index].likes +=1;
+        if (comments[id].like === true) {
+          comments[id].like = false;
+          comments[id].likes +=1;
         }
-        else if (comments[index].like === false) {
-          comments[index].like = true;
-          comments[index].likes -=1;
+        else if (comments[id].like === false) {
+          comments[id].like = true;
+          comments[id].likes -=1;
         }
 
         renderComments ();
@@ -117,9 +160,9 @@ const answer =() => {
 
     answerComment.addEventListener("click", ()=> {
 
-      const index = answerComment.dataset.index;
+      const id = answerComment.dataset.id;
    
-      textareaInputElement.textContent = `QUOTE_BEGINS ${comments[index].name} : \n ${comments[index].text} QUOTE_ENDS`;
+      textareaInputElement.textContent = `QUOTE_BEGINS ${comments[id].name} : \n ${comments[id].text} QUOTE_ENDS`;
       
       renderComments();
       
@@ -133,9 +176,9 @@ const answer =() => {
 
    
     const listElementHtml = comments
-    .map((comment, index) => {
+    .map((comment, id) => {
 
-      return  `<li class="comment answer-button" data-index="${index}">
+      return  `<li class="comment answer-button" data-id="${id}">
       <div class="comment-header">
         <div> ${comment.name} </div>
         <div>${comment.date}</div>
@@ -149,7 +192,7 @@ const answer =() => {
       <div class="comment-footer">
         <div class="likes">
           <span class="likes-counter">${comment.likes}</span>
-          <button data-index="${index}" class="${comment.like ? "like-button" : "like-button -active-like "}" id ="like-input"></button>
+          <button data-id="${id}" class="${comment.like ? "like-button" : "like-button -active-like "}" id ="like-input"></button>
         </div>
       </div>
     </li>`;
