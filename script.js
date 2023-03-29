@@ -5,6 +5,9 @@ const listElement = document.getElementById("comments");
 const textInputElement = document.getElementById("name-input");
 const textareaInputElement = document.getElementById("comment-input");
 const mainForm = document.querySelector(".add-form");
+const loadingPage = document.getElementById("loading_comments")
+
+loadingPage.style.display = "flex";
 
 
 function getDate(date) {
@@ -31,18 +34,21 @@ let comments = [{
 
 
 
-const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
+const fetchAndLogComments = () => {
+  return fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
   method: "GET"
-});
-
-fetchPromise.then((response) => {
-  const jsonPromise = response.json();
-  jsonPromise.then((responseData) => {
-    comments = responseData.comments;
+})
+.then((response) => {
+  return  response.json()
+})
+.then((responseData) => {
+  comments = responseData.comments;
+  })
+.then(() =>{
+  loadingPage.style.display = "none";
   renderComments();
-  });
-});
-
+})
+};
 
 
 
@@ -59,7 +65,14 @@ const enter = () => {
         return;
       }
 
-      else { fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
+      else { 
+        
+        buttonComment.disabled = true;
+        const formElement =  mainForm.innerHTML; 
+        mainForm.innerHTML = `<div class="adding"> Комментарий отправляется..</div>`;
+
+        
+        fetch ("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
         method: "POST",
         body: JSON.stringify({
           date: new Date,
@@ -68,35 +81,22 @@ const enter = () => {
           name: textInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;"),
           text: textareaInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("QUOTE_BEGINS", "<div class='quote'>").replaceAll("QUOTE_ENDS", "</div>")
         })
-      }).then((response) => {
-
-        const fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
-          method: "GET"
-        });
-        
-        fetchPromise.then((response) => {
-          const jsonPromise = response.json();
-          jsonPromise.then((responseData) => {
-            comments = responseData.comments;
-         renderComments();
-          });
-        });  
-
-
-        response.json().then((responseData) => {
-          comments = responseData.comments;
-         //renderComments();
-        });
-      });
-
-
+      })
+      .then(() => {
+        return fetchAndLogComments();
+        })
+      .then(() => {
+        mainForm.innerHTML = formElement;
+        buttonComment.disabled = false;
+      })
       
     renderComments();
 
-    buttonComment.disabled = true;
+   
     textInputElement.value = "";
     textareaInputElement.value = "";
   };
+ 
 }
   
 
@@ -104,7 +104,6 @@ const enter = () => {
   document.addEventListener("keyup", (e) => {
     if (e.code === "Enter") {
       enter();
-  
     }
       });
 
@@ -161,6 +160,10 @@ const answer =() => {
       textareaInputElement.textContent = `QUOTE_BEGINS ${comments[index].name} : \n ${comments[index].text} QUOTE_ENDS`;
       
       renderComments();
+      fetchAndLogComments();
+
+      buttonComment.disabled = false;
+
     });
   };
 }
@@ -197,6 +200,7 @@ const answer =() => {
   listElement.innerHTML = listElementHtml;
   textInputElement.classList.remove("error");
   textareaInputElement.classList.remove("error");
+  buttonComment.disabled = false;
 
   initAddLike();
   answer();
@@ -204,6 +208,7 @@ const answer =() => {
 };
 
 renderComments ();
+fetchAndLogComments();
 
     // Код писать здесь
     console.log("It works!");
