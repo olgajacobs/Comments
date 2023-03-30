@@ -22,17 +22,15 @@ function getDate(date) {
   return newDate.toLocaleString('ru-RU', options).replace(',', '');
 }
 
-let comments = [{
-  id:"",
-  date: getDate(new Date),
-  likes: 0,
-  text: "",
-  author: {name: ""},
-  isLiked: false,
-}
-];
+let comments = [];
 
-
+window.addEventListener('input', function () {
+  if (textInputElement.value === '' || textareaInputElement.value === '') {
+    buttonComment.disabled = true;
+  } else {
+    buttonComment.disabled = false;
+  }
+});
 
 const fetchAndLogComments = () => {
   return fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
@@ -50,24 +48,23 @@ const fetchAndLogComments = () => {
 })
 };
 
+fetchAndLogComments();
+
 
 
 
 const enter = () => { 
 
-     if (textInputElement.value === "") {
-        textInputElement.classList.add("error");
-        return;
-      }
-
-      else if (textareaInputElement.value === "") {
-        textareaInputElement.classList.add("error");
-        return;
-      }
+  if (textInputElement.value === '' || textareaInputElement.value === '') {
+    if (textInputElement.value === '') 
+    textInputElement.classList.add('error');
+    if (textareaInputElement.value === '')
+      textareaInputElement.classList.add('error');
+    return;
+}
 
       else { 
         
-        buttonComment.disabled = true;
         const formElement =  mainForm.innerHTML; 
         mainForm.innerHTML = `<div class="adding"> Комментарий отправляется..</div>`;
 
@@ -87,7 +84,7 @@ const enter = () => {
         })
       .then(() => {
         mainForm.innerHTML = formElement;
-        buttonComment.disabled = false;
+      
       })
       
     renderComments();
@@ -95,6 +92,7 @@ const enter = () => {
    
     textInputElement.value = "";
     textareaInputElement.value = "";
+
   };
  
 }
@@ -158,14 +156,9 @@ const answer =() => {
       const index = answerComment.dataset.index;
    
       textareaInputElement.textContent = `QUOTE_BEGINS ${comments[index].name} : \n ${comments[index].text} QUOTE_ENDS`;
-      
-      renderComments();
-      fetchAndLogComments();
-
-      buttonComment.disabled = false;
-
+    
     });
-  };
+  }
 }
     
   
@@ -200,15 +193,13 @@ const answer =() => {
   listElement.innerHTML = listElementHtml;
   textInputElement.classList.remove("error");
   textareaInputElement.classList.remove("error");
-  buttonComment.disabled = false;
+  
 
   initAddLike();
   answer();
- 
 };
 
-renderComments ();
-fetchAndLogComments();
+answer();
 
-    // Код писать здесь
-    console.log("It works!");
+
+console.log("It works!");
