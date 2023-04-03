@@ -33,13 +33,13 @@ export let comments = [];
 // функция загрузки комментариев
 
 const fetchAndLogComments = () => {
-  return fetchPromise = fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
+  return fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
   method: "GET"
 })
 .then((response) => {
   if (response.status === 500) {
       throw new Error("Кажется сервер сломался")};
-      return  response.json()
+      return  response.json();
 })
 .then((responseData) => {
   comments = responseData.comments;
@@ -93,7 +93,6 @@ removeComment.addEventListener("click", () => {
 });
 
 
-postComment();
 answer();
 initAddLike();
 renderComments();

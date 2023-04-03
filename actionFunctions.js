@@ -21,7 +21,8 @@ export const postComment =() => {
           throw new Error("Имя или текст короче 3 символов");
         } 
         if (response.status === 500) {
-          throw new Error("Кажется сервер сломался")
+            postComment();
+          throw new Error("Кажется сервер сломался");
         }
   
         mainForm.style.display = "none";
@@ -31,30 +32,29 @@ export const postComment =() => {
       .then(() => {
         mainForm.style.display = "flex";
         loader.style.display = "none";
+        textInputElement.value = "";
+        textareaInputElement.value = "";
       })
       .catch((error) => {
         if (error.message === "Кажется сервер сломался") {
             mainForm.style.display = "flex";
             loader.style.display = "none";
-          alert("Сервер упал")   
-          return
+          alert("Сервер упал");   
+          return;
         }
         if (error.message === "Имя или текст короче 3 символов") {
             mainForm.style.display = "flex";
             loader.style.display = "none";
-          alert("Имя или текст не могут быть короче 3 символов")  
-          return   
+          alert("Имя или текст не могут быть короче 3 символов")  ;
+          return  ; 
         }
-        alert("Интернет соединение прервано, попробуйте позже")
-        return
+
+        mainForm.style.display = "flex";
+        loader.style.display = "none";
+        alert("Интернет соединение прервано, попробуйте позже");
+        return;
       })
-      .then(() => {
-        textInputElement.value = "";
-        textareaInputElement.value = "";
-      })
-  
-      renderComments();
-  
+    
   }
 
 
@@ -108,7 +108,7 @@ export const answer =() => {
 
 // функция рендер комментариев
 
-export  const renderComments = () => {
+export const renderComments = () => {
 
     const listElementHtml = comments
     .map((comment, index) => {
