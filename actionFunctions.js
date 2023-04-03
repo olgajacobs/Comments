@@ -21,7 +21,6 @@ export const postComment =() => {
           throw new Error("Имя или текст короче 3 символов");
         } 
         if (response.status === 500) {
-            postComment();
           throw new Error("Кажется сервер сломался");
         }
   
