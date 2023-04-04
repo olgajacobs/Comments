@@ -1,7 +1,7 @@
 
-import { postComment, initAddLike, answer, renderComments } from "./actionFunctions.js";
+import {initAddLike, answer, renderComments, isValidForm } from "./actionFunctions.js";
 
-const buttonComment = document.getElementById("add-button");
+export const buttonComment = document.getElementById("add-button");
 const removeComment = document.getElementById("remove-comment");
 export const listElement = document.getElementById("comments");
 export const textInputElement = document.getElementById("name-input");
@@ -16,23 +16,14 @@ const loadingPage = document.querySelector(".loading_comments")
 loader.style.display = "none";
 loadingPage.style.display = "flex"
 
-// функция проверки что все поля заполнены
-const isValidForm = () => {
-    if (textInputElement.value === "" || textareaInputElement.value === "") {
-        buttonComment.disabled = true;
-        return false;
-      } else {
-        buttonComment.disabled = false;
-        return true;
-      }
-    };
+
 
 export let comments = [];
 
 
 // функция загрузки комментариев
 
-const fetchAndLogComments = () => {
+export const fetchAndLogComments = () => {
   return fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
   method: "GET"
 })
@@ -55,6 +46,61 @@ const fetchAndLogComments = () => {
 };
 
 fetchAndLogComments();
+
+// функция публикации комментария
+
+export const postComment =() => {
+        
+  fetch ("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
+  method: "POST",
+  body: JSON.stringify({
+    date: new Date,
+    likes: 0,
+    isLiked: false,
+    name: textInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;"),
+    text: textareaInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("QUOTE_BEGINS", "<div class='quote'>").replaceAll("QUOTE_ENDS", "</div>"),
+
+  })
+})
+.then((response) => {
+  if (response.status === 400){
+    throw new Error("Имя или текст короче 3 символов");
+  } 
+  if (response.status === 500) {
+    throw new Error("Кажется сервер сломался");
+  }
+
+  mainForm.style.display = "none";
+  loader.style.display = "flex";
+  return fetchAndLogComments();
+  })
+.then(() => {
+  mainForm.style.display = "flex";
+  loader.style.display = "none";
+  textInputElement.value = "";
+  textareaInputElement.value = "";
+})
+.catch((error) => {
+  if (error.message === "Кажется сервер сломался") {
+      mainForm.style.display = "flex";
+      loader.style.display = "none";
+    alert("Сервер упал");   
+    return;
+  }
+  if (error.message === "Имя или текст короче 3 символов") {
+      mainForm.style.display = "flex";
+      loader.style.display = "none";
+    alert("Имя или текст не могут быть короче 3 символов")  ;
+    return  ; 
+  }
+
+  mainForm.style.display = "flex";
+  loader.style.display = "none";
+  alert("Интернет соединение прервано, попробуйте позже");
+  return;
+})
+
+}
 
 
 

@@ -1,4 +1,3 @@
-//import { textInputElement, textareaInputElement, buttonComment } from "./script";
 
 // функция даты
 
