@@ -150,3 +150,12 @@ body {
   .error {
     background-color: lightsalmon;
   }
+
+  .adding {
+    font-size: 16px;
+  }
+
+  .loading_comments {
+    display: none;
+    margin-bottom: 20px;
+  }
