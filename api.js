@@ -41,8 +41,7 @@ export function getComments(token) {
     },
   }).then((response) => {
     if (response.status === 401) {
-      password = prompt("Введите верный пароль");
-      fetchTodosAndRender();
+      alert ('Ошибка при авторизации')
       throw new Error('Нет авторизации');
     }
     return response.json();

@@ -71,13 +71,15 @@ const buttonListener = () => {
 }
 
       // удалить последний комментарий
-// const deleteComment = () => {
-//      const removeComment = document.getElementById("remove-comment");
- //     removeComment.addEventListener("click", ()=> {
-//      listComments.pop();
- //     renderComments(listComments)
+//const deleteComment = () => {
+ // const removeComment = document.getElementById("remove-comment");
+ // removeComment.addEventListener("click", ()=> {
+//    const listElement = document.getElementById("comments");
+//    listElement.removeChild(listElement.lastElementChild);
+//    renderComments(listComments)
  //     })
-//    }
+ 
+ //}
 
 
 
@@ -115,7 +117,7 @@ const AutorizationButtonListener = () => {
       TextAreaElement.value = "";
       InputElement.value = user;
 
-    //  deleteComment();
+  //    deleteComment();
       buttonListener();
       initLikeListeners(renderComments, listComments);
       initCommentListeners(listComments);
