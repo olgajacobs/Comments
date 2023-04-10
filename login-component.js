@@ -1,4 +1,4 @@
-import { loginUser, registerUser } from "../api.js";
+import { loginUser, registerUser } from "./api.js";
 import { siteView } from './siteView.js';
 
 
