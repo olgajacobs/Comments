@@ -15,12 +15,12 @@ export function initLikeListeners(renderComments,listComments) {
         likeElement.addEventListener("click", (event) => {
             event.stopPropagation();
             const id = likeElement.dataset.id;
-            if (comments[id].isLiked) {
-                comments[id].likes -= (comments[id].likes) ? 1 : 0;
-                comments[id].isLiked = false;
+            if (listComments[id].isLiked) {
+                listComments[id].likes -= (comments[id].likes) ? 1 : 0;
+                listComments[id].isLiked = false;
             } else {
-                comments[id].likes += 1;
-                comments[id].isLiked = true;
+                listComments[id].likes += 1;
+                listComments[id].isLiked = true;
             }
             renderComments(listComments);
         });
