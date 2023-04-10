@@ -1,147 +1,134 @@
-
-import {initAddLike, answer, renderComments, isValidForm } from "./actionFunctions.js";
-
-export const buttonComment = document.getElementById("add-button");
-const removeComment = document.getElementById("remove-comment");
-export const listElement = document.getElementById("comments");
-export const textInputElement = document.getElementById("name-input");
-export const textareaInputElement = document.getElementById("comment-input");
-export const mainForm = document.querySelector(".add-form");
+import { renderLoginComponent } from './login-component.js';
+import { addComment, getComments} from './api.js';
+import { getListComments, initLikeListeners, initCommentListeners } from './export_function.js';
+import { siteView } from './siteView.js';
 
 
-// статус загрузки комментариев
-export const loader = document.querySelector('.adding');
-const loadingPage = document.querySelector(".loading_comments")
+const appEl = document.getElementById("app");
+let listComments = [];
+let token =null;
+let user = null;
 
-loader.style.display = "none";
-loadingPage.style.display = "flex"
+const updateComments = (firstLoading = false) => {
+
+  // Первая загрузка
+  if (firstLoading) {
+    renderComments(listComments, true);
+  }
+  // Чтение данных по API и обновление экрана
+  getComments(token).then((responseData) => {
+    const listComments= responseData.comments.map((comment) => getListComments(comment));
 
 
-
-export let comments = [];
-
-
-// функция загрузки комментариев
-
-export const fetchAndLogComments = () => {
-  return fetch("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
-  method: "GET"
-})
-.then((response) => {
-  if (response.status === 500) {
-      throw new Error("Кажется сервер сломался")};
-      return  response.json();
-})
-.then((responseData) => {
-  comments = responseData.comments;
-  loadingPage.style.display = "none";
-  renderComments();
-  })
-.catch((error) => {
-    if (error.message === "Кажется сервер сломался") {
-      alert("Сервер упал")
-      return;
-    }
-})
+    renderComments(listComments);
+  });
 };
 
-fetchAndLogComments();
+function postComment(TextAreaElement, InputElement) {
 
-// функция публикации комментария
+  const name = InputElement.value.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  const text = TextAreaElement.value.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
-export const postComment =() => {
-        
-  fetch ("https://webdev-hw-api.vercel.app/api/v1/olya-jacobs/comments", {
-  method: "POST",
-  body: JSON.stringify({
-    date: new Date,
-    likes: 0,
-    isLiked: false,
-    name: textInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;"),
-    text: textareaInputElement.value.replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("QUOTE_BEGINS", "<div class='quote'>").replaceAll("QUOTE_ENDS", "</div>"),
+  addComment(token,name, text).then(() => {
+    TextAreaElement.value = "";
+    InputElement.value = "";
+    updateComments();
+  }).catch((error) => {
+    if (error.message === 'Сервер не отвечает') {
+      console.log('500');
+      postComment(TextAreaElement, InputElement);
+    }
+    const oldInputElement = InputElement.value;
+    const oldTextAreaElement = TextAreaElement.value;
 
+    renderComments(listComments);
+
+    InputElement.value = oldInputElement;
+    TextAreaElement.value = oldTextAreaElement;
   })
-})
-.then((response) => {
-  if (response.status === 400){
-    throw new Error("Имя или текст короче 3 символов");
-  } 
-  if (response.status === 500) {
-    throw new Error("Кажется сервер сломался");
-  }
+}
+// Завешиваем обработчик кнопки "Написать" (добавление комментария)
+const buttonListener = () => {
+  
+  const buttonElement = document.getElementById("add-form-button");
+  const InputElement = document.getElementById("add-form-name");
+  const TextAreaElement = document.getElementById("add-form-text");
+  buttonElement.addEventListener("click", () => {
 
-  mainForm.style.display = "none";
-  loader.style.display = "flex";
-  return fetchAndLogComments();
-  })
-.then(() => {
-  mainForm.style.display = "flex";
-  loader.style.display = "none";
-  textInputElement.value = "";
-  textareaInputElement.value = "";
-})
-.catch((error) => {
-  if (error.message === "Кажется сервер сломался") {
-      mainForm.style.display = "flex";
-      loader.style.display = "none";
-    alert("Сервер упал");   
-    return;
-  }
-  if (error.message === "Имя или текст короче 3 символов") {
-      mainForm.style.display = "flex";
-      loader.style.display = "none";
-    alert("Имя или текст не могут быть короче 3 символов")  ;
-    return  ; 
-  }
-
-  mainForm.style.display = "flex";
-  loader.style.display = "none";
-  alert("Интернет соединение прервано, попробуйте позже");
-  return;
-})
-
+    if (InputElement.value === "") {
+      alert("Не введено имя");
+      return;
+    }
+    if (TextAreaElement.value === "") {
+      alert("Пустой комментарий");
+      return;
+    }
+    // Меняем форму ввода на сообщение 'Комментарий добавляется'
+    // isLoading = true;
+    renderComments(listComments, false, true);
+    postComment(TextAreaElement, InputElement);
+  });
 }
 
+      // удалить последний комментарий
+// const deleteComment = () => {
+//      const removeComment = document.getElementById("remove-comment");
+ //     removeComment.addEventListener("click", ()=> {
+//      listComments.pop();
+ //     renderComments(listComments)
+ //     })
+//    }
 
 
-// отправка комментарий нажатием Enter
 
-mainForm.addEventListener("keyup", (action) => {
+const AutorizationButtonListener = () => {
+    // Завешиваем обработчик кнопки "Авторизуйтесь" Переход к форме Логин/Регистрация
+    
+    const AutorizationButtonElement = document.getElementById("autorization-button");
+  
+    AutorizationButtonElement.addEventListener("click", () => {
+      renderLoginComponent({
+        appEl,
+        setToken: (newToken) => {
+          token = newToken;
+        },
+          updateComments,
+          setUser: (newUser) => {
+            user = newUser;
+          },
+      });
+      
+      });
+  }
 
-  if (action.code === "Enter" && isValidForm()) {
-    postComment();
- 
-}})
+  const renderComments = (listComments, firstLoading = false, isLoading = false,isLogin =false) => {
 
- // обработчик клика при нажатии на кнопку "написать"
+    const commentsHtml = siteView(listComments, firstLoading, isLoading,token? true:false,isLogin)
+  
+    // const buttonElement = document.getElementById("add-form-button");
+    appEl.innerHTML = commentsHtml;
+    const a=!(isLoading || firstLoading || isLogin || token === null);
+    if (!(isLoading || firstLoading || isLoading ||isLogin ||token===null)) {
+      
+      const InputElement = document.getElementById("add-form-name");
+      const TextAreaElement = document.getElementById("add-form-text");
+      TextAreaElement.value = "";
+      InputElement.value = user;
 
-buttonComment.addEventListener("click", () => {
-
-  if (textInputElement.value === '' || textareaInputElement.value === '') {
-    if (textInputElement.value === '') 
-    textInputElement.classList.add('error');
-    if (textareaInputElement.value === '')
-      textareaInputElement.classList.add('error');
-    return;
-}
- postComment()
-
- textInputElement.classList.remove('error');
- textareaInputElement.classList.remove('error');
-
- renderComments();
-}) 
-
-// обработчик клика при нажатии на кнопку "удалить последний комментарий"
-
-removeComment.addEventListener("click", () => {
-    listElement.removeChild(listElement.lastElementChild);
-});
+    //  deleteComment();
+      buttonListener();
+      initLikeListeners(renderComments, listComments);
+      initCommentListeners(listComments);
+    }
+    if (!(isLoading || firstLoading || isLoading || isLogin) && token === null) {
+      AutorizationButtonListener();
+    }
+  };
+  
+  updateComments(true);
 
 
-answer();
-initAddLike();
-renderComments();
 
 
-console.log("It works!");
+
+
