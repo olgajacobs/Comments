@@ -85,3 +85,23 @@ export function registerUser({ login, password,name }) {
       return response.json();
     })
 }
+
+export function deleteComment(token,id) {
+  return fetch(hostComments+"/"+id, {
+    method: "DELETE",
+    headers: {
+      Authorization: token,
+    },
+  }).then((response) => {
+    if (response.status === 200) {
+      // Успешное удаление записи
+      return response.json();
+    } else if (response.status === 401) {
+      alert('Ошибка при авторизации');
+      throw new Error('Нет авторизации');
+    } else {
+      alert(`Ошибка при удалении ID: ${id}`);
+      throw new Error('Прочие ошибки удаления');
+    }
+  })
+}

@@ -4,7 +4,8 @@ export function getListComments(comment) {
         date: new Date(comment.date),
         text: comment.text,
         likes: comment.likes,
-        isLiked: comment.isLiked
+        isLiked: comment.isLiked,
+        id: comment.id,
     }
 }
 export function initLikeListeners(renderComments,listComments) {

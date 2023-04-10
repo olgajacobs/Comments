@@ -1,5 +1,5 @@
 import { renderLoginComponent } from './login-component.js';
-import { addComment, getComments} from './api.js';
+import { addComment, getComments, deleteComment} from './api.js';
 import { getListComments, initLikeListeners, initCommentListeners } from './export_function.js';
 import { siteView } from './siteView.js';
 
@@ -47,6 +47,25 @@ function postComment(TextAreaElement, InputElement) {
     TextAreaElement.value = oldTextAreaElement;
   })
 }
+
+
+const deleteButtonListener = (listComments) => {
+  // Завешиваем обработчик кнопки "Удалить последний комментарий"
+  const deleteButtonElement = document.getElementById("remove-comment");
+  deleteButtonElement.addEventListener("click", () => {
+    if (!confirm("Вы действительно хотите удалить последний комментарий?")) {
+      return;
+    }
+    const id=listComments[listComments.length-1].id;
+    deleteComment(token, id).then((responseData) => {
+      updateComments();
+    }).catch((error) => {
+      // if (error.message === 'Сервер не отвечает') {
+    })
+  });
+}
+
+
 // Завешиваем обработчик кнопки "Написать" (добавление комментария)
 const buttonListener = () => {
   
@@ -69,19 +88,6 @@ const buttonListener = () => {
     postComment(TextAreaElement, InputElement);
   });
 }
-
-      // удалить последний комментарий
-//const deleteComment = () => {
- // const removeComment = document.getElementById("remove-comment");
- // removeComment.addEventListener("click", ()=> {
-//    const listElement = document.getElementById("comments");
-//    listElement.removeChild(listElement.lastElementChild);
-//    renderComments(listComments)
- //     })
- 
- //}
-
-
 
 const AutorizationButtonListener = () => {
     // Завешиваем обработчик кнопки "Авторизуйтесь" Переход к форме Логин/Регистрация
@@ -117,17 +123,21 @@ const AutorizationButtonListener = () => {
       TextAreaElement.value = "";
       InputElement.value = user;
 
-  //    deleteComment();
+ 
       buttonListener();
       initLikeListeners(renderComments, listComments);
       initCommentListeners(listComments);
+      deleteButtonListener(listComments);
     }
     if (!(isLoading || firstLoading || isLoading || isLogin) && token === null) {
       AutorizationButtonListener();
     }
+
   };
   
   updateComments(true);
+
+
 
 
 
