@@ -1,14 +1,16 @@
+import { format } from "date-fns";
+
 export function siteView(listComments, firstLoading=false, isLoading=false, autorized=false, login=false,isLoginMode=false) {
   const d_hide = "none";
   const d_show = '';
 
-  const options = {
-    year: '2-digit',
-    month: 'numeric',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-}
+ // const options = {
+   // year: '2-digit',
+    //month: 'numeric',
+    //day: 'numeric',
+    //hour: '2-digit',
+    //minute: '2-digit',
+//}
 
   let commentsHtml = '';
   if (firstLoading) {
@@ -39,7 +41,7 @@ export function siteView(listComments, firstLoading=false, isLoading=false, auto
       return ` <li class="comment" data-id="${id}">
               <div class="comment-header">
                   <div>${comment.name}</div>
-                  <div>${comment.date.toLocaleString('ru-RU', options).replace(',', '')}</div>
+                  <div>${format(new Date(comment.date)), 'yyyy-MM-dd hh.mm.ss'}</div>
               </div>
               <div class="comment-body">
                   <div class="comment-text" style="white-space: pre-line">

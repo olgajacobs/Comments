@@ -9,12 +9,12 @@ export function addComment(token,name, text) {
       Authorization: token,
     },
     body: JSON.stringify({
-      name: name,
-      date: new Date(),
+   //   name: name,
+    //  date: new Date(),
       text: text,
-      likes: 0,
-      isLiked: false,
-      forceError: true
+   //   likes: 0,
+  //    isLiked: false,
+  //    forceError: true
     })
   }).then((response) => {
     if (response.status === 200) {

@@ -1,7 +1,9 @@
+
+
 export function getListComments(comment) {
     return {
         name: comment.author.name,
-        date: new Date(comment.date),
+        date: new Date(comment.date), 
         text: comment.text,
         likes: comment.likes,
         isLiked: comment.isLiked,
